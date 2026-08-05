@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Private Message (চূড়ান্ত সংস্করণ)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00a884;
+            --send-btn-color: #00a884;
+            --bg-color: #efeae2;
+            --card-bg: #ffffff;
+            --text-color: #111b21;
+            --secondary-text: #667781;
+            --chat-bubble-sent: #d9fdd3;
+            --chat-bubble-recv: #ffffff;
+            --header-bg: #00a884;
+        }
+
+        body {
+            box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind Siliguri', sans-serif;
+            background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center;
+            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+        }
+
+        input, textarea, select {
+            -webkit-user-select: text !important; user-select: text !important;
+        }
+
+        .app-wrapper {
+            width: 100%; max-width: 480px; height: 100vh; height: 100dvh;
+            background: var(--bg-color); display: flex; flex-direction: column;
+            position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden;
+        }
+
+        #auth-page {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 25px; text-align: center; overflow-y: auto; background: #fff;
+        }
+        .auth-card {
+            width: 100%; background: #fff; padding: 20px; border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-top: 15px;
+        }
+        .form-group { text-align: left; margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
+            outline: none; font-size: 14px; box-sizing: border-box; font-family: inherit;
+        }
+        .btn-primary {
+            width: 100%; padding: 11px; background: var(--primary-color); color: #fff;
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px;
+        }
+        .divider { display: flex; align-items: center; margin: 15px 0; color: gray; font-size: 13px; }
+        .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid #ddd; }
+        .divider::before { margin-right: 10px; }
+        .divider::after { margin-left: 10px; }
+
+        .google-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #fff; border: 1px solid #ccc; padding: 10px;
+            border-radius: 25px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1); width: 100%;
+        }
+        .toggle-text { font-size: 13px; margin-top: 12px; }
+        .toggle-text span { color: var(--primary-color); cursor: pointer; font-weight: bold; }
+
+        .header { padding: 12px 15px; background: var(--header-bg); color: white; display: flex; align-items: center; justify-content: space-between; }
+        .search-bar { padding: 8px 12px; background: #fff; border-bottom: 1px solid #eee; display: flex; gap: 8px; align-items: center;}
+        .search-bar input {
+            flex: 1; padding: 8px 15px; border-radius: 20px; border: none;
+            outline: none; background: #f0f2f5; box-sizing: border-box; font-size: 14px;
+        }
+        .create-group-btn { background: #005c4b; color: #fff; border: none; padding: 7px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 6px; padding-bottom: 90px; }
+        .user-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fff;
+            border-radius: 8px; cursor: pointer; transition: 0.2s; position: relative; margin-bottom: 4px;
+        }
+        .user-item:hover { background: #f2f2f2; }
+        .avatar-container { position: relative; display: inline-block; cursor: pointer; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        
+        .status-dot {
+            position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px;
+            border-radius: 50%; border: 2px solid #fff; background: #ccc;
+        }
+        .status-dot.online { background: #31a24c; }
+
+        .user-info { flex: 1; border-bottom: 1px solid #f0f2f5; padding-bottom: 6px; }
+        .user-info h4 { margin: 0 0 2px 0; font-size: 16px; font-weight: 500; }
+        .user-info p { margin: 0; font-size: 13px; color: var(--secondary-text); }
+
+        #chat-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); display: none; flex-direction: column; z-index: 10;
+        }
+        .chat-header { padding: 8px 12px; background: var(--header-bg); color: #fff; display: flex; align-items: center; gap: 8px; z-index: 15; }
+        .back-btn { background: none; border: none; font-size: 18px; color: white; cursor: pointer; padding: 0; }
+        
+        .chat-body { 
+            flex: 1; padding: 15px; overflow-y: auto; display: flex; 
+            flex-direction: column; gap: 8px; padding-bottom: 85px; 
+            background-image: radial-gradient(#d1d7db 0.75px, transparent 0.75px);
+            background-size: 24px 24px;
+            -webkit-user-select: none; user-select: none;
+        }
+
+        .msg-row { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; }
+        .msg-row.sent { align-items: flex-end; }
+        .msg-row.recv { align-items: flex-start; }
+
+        .msg-bubble-wrapper { display: flex; align-items: flex-end; gap: 4px; max-width: 82%; position: relative; }
+        .msg { padding: 8px 12px; border-radius: 7.5px; font-size: 14.5px; word-break: break-word; position: relative; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); }
+        .sent .msg { background: var(--chat-bubble-sent); color: #111b21; border-top-right-radius: 0; }
+        .recv .msg { background: var(--chat-bubble-recv); color: #111b21; border-top-left-radius: 0; }
+        
+        .msg img { max-width: 100%; border-radius: 6px; margin-top: 4px; display: block; pointer-events: none; }
+        .msg video { max-width: 100%; max-height: 220px; border-radius: 6px; margin-top: 4px; display: block; }
+        .msg audio { max-width: 200px; height: 35px; margin-top: 4px; }
+
+        .msg-meta { display: flex; align-items: center; gap: 3px; font-size: 10px; color: #667781; float: right; margin-top: 4px; margin-left: 6px; }
+
+        .msg-context-menu {
+            position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none; z-index: 1000; overflow: hidden; font-size: 13px; font-weight: 600;
+        }
+        .msg-context-menu div { padding: 10px 18px; cursor: pointer; color: #e74c3c; border-bottom: 1px solid #f0f2f5; }
+        .msg-context-menu div:hover { background: #f8f9fa; }
+
+        .chat-input-area { 
+            position: absolute; bottom: max(8px, env(safe-area-inset-bottom));
+            left: 8px; right: 8px; display: flex; align-items: center; gap: 6px; background: transparent; z-index: 99; box-sizing: border-box;
+        }
+        .input-pill-box {
+            flex: 1; display: flex; align-items: center; background: #ffffff;
+            border-radius: 24px; padding: 6px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); gap: 8px; min-width: 0;
+        }
+        .input-pill-box input[type="text"] { 
+            flex: 1; min-width: 0; padding: 6px 0; border: none; outline: none; background: transparent; font-size: 15px; color: #111b21;
+        }
+        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #54656f; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .send-btn { 
+            background: var(--send-btn-color); color: #fff; border: none; width: 45px; height: 45px;
+            border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0;
+        }
+
+        .settings-group { padding: 15px; display: flex; flex-direction: column; gap: 12px; align-items: center; background: #fff; height: 100%; overflow-y: auto; box-sizing: border-box; }
+        
+        .profile-container-edit { position: relative; cursor: pointer; display: inline-block; }
+        .profile-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); display: block; }
+        .profile-edit-overlay {
+            position: absolute; bottom: 0; right: 0; background: var(--primary-color); color: #fff;
+            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .settings-group label { align-self: flex-start; font-weight: bold; font-size: 13px; margin-bottom: -6px; }
+        .settings-group input[type="text"], .settings-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+        .save-btn { width: 100%; padding: 11px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .logout-btn { width: 100%; padding: 11px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .setting-card-item { width: 100%; display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 10px 12px; border-radius: 8px; border: 1px solid #eee; font-size: 13px; font-weight: 600; }
+
+        .bottom-nav { 
+            position: absolute; bottom: 0; left: 0; right: 0; width: 100%; height: 58px; 
+            display: flex; justify-content: space-around; align-items: center; background: #ffffff; 
+            border-top: 1px solid #e2e8f0; z-index: 5; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { border: none; background: none; font-size: 20px; color: #54656f; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 600; }
+        .nav-item span.nav-icon { font-size: 20px; }
+        .nav-item.active { color: var(--primary-color); }
+
+        #image-viewer-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; padding: 20px; box-sizing: border-box;
+        }
+        #image-viewer-modal img { max-width: 95%; max-height: 70%; border-radius: 8px; object-fit: contain; pointer-events: none; }
+        #image-viewer-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 28px; cursor: pointer; font-weight: bold; background: none; border: none; z-index: 1001; }
+
+        .panel-box { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+        
+        .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 10px 0; max-height: 250px; overflow-y: auto; }
+        .sticker-item { font-size: 26px; cursor: pointer; text-align: center; padding: 6px; background: #f0f2f5; border-radius: 8px; transition: 0.1s; }
+        .sticker-item:active { transform: scale(0.9); background: #e2e8f0; }
+
+        .story-container { display: flex; gap: 12px; overflow-x: auto; padding: 10px; background: #fff; margin-bottom: 10px; border-radius: 8px; align-items: center; }
+        .story-circle { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex-shrink: 0; }
+        .story-ring { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary-color); padding: 2px; display: flex; align-items: center; justify-content: center; background: #fff; }
+        .story-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .story-circle span { font-size: 11px; max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+        .add-story-ring { border: 3px dashed #ccc; color: #00a884; font-size: 24px; font-weight: bold; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <div id="auth-page">
+        <h2 style="margin-top: 10px; color: #00a884;">🟢 Private Message</h2>
+        <p style="color: gray; margin-top: 5px; font-size: 13px;">নিরাপদ চ্যাট, গ্রুপ এবং স্টোরি সিস্টেম</p>
+
+        <div class="auth-card" id="login-box">
+            <h3 style="margin-bottom: 10px;">লগইন করুন</h3>
+            <div class="form-group">
+                <label>ইমেইল:</label>
+                <input type="email" id="login-email" placeholder="আপনার ইমেইল দিন">
+            </div>
+            <div class="form-group">
+                <label>পাসওয়ার্ড:</label>
+                <input type="password" id="login-password" placeholder="পাসওয়ার্ড দিন">
+            </div>
+            <button class="btn-primary" id="email-login-btn">লগইন</button>
+
+            <div class="divider">অথবা</div>
+
+            <button class="google-btn" id="google-login">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                <span>গুগল দিয়ে প্রবেশ করুন</span>
+            </button>
+
+            <div class="toggle-text">
+                <span>অ্যাকাউন্ট নেই?</span> <span onclick="toggleAuthForms('register')">নতুন রেজিস্ট্রেশন করুন</span>
+            </div>
+        </div>
+
+        <div class="auth-card" id="register-box" style="display: none;">
+            <h3 style="margin-bottom: 10px;">নতুন অ্যাকাউন্ট</h3>
+            <div class="form-group">
+                <label>আপনার নাম:</label>
+                <input type="text" id="reg-name" placeholder="পুরো নাম">
+            </div>
+            <div class="form-group">
+                <label>ইমেইল:</label>
+                <input type="email" id="reg-email" placeholder="ইমেইল দিন">
+            </div>
+            <div class="form-group">
+                <label>পাসওয়ার্ড:</label>
+                <input type="password" id="reg-password" placeholder="কমপক্ষে ৬ ডিজিট">
+            </div>
+            <button class="btn-primary" id="email-reg-btn">রেজিস্ট্রেশন করুন</button>
+
+            <div class="toggle-text">
+                <span>আগে থেকেই অ্যাকাউন্ট আছে?</span> <span onclick="toggleAuthForms('login')">লগইন করুন</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" style="display:none; flex-direction:column; height:100%; position:relative;">
+        <div class="header">
+            <h2 id="page-title" style="margin:0; font-size:20px;">Chats</h2>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="my-user-id" style="font-size: 11px; background: rgba(0,0,0,0.15); padding: 3px 6px; border-radius: 6px;">ID: ...</span>
+            </div>
+        </div>
+
+        <div class="search-bar" id="search-container">
+            <input type="text" id="search-input" placeholder="ইউজার নাম বা ID দিয়ে খুঁজুন...">
+            <button class="create-group-btn" onclick="openCreateGroupModal()">➕ নতুন গ্রুপ</button>
+        </div>
+
+        <div class="content-area" id="main-content" onclick="hideGlobalContextMenu()"></div>
+
+        <div class="bottom-nav">
+            <button class="nav-item active" id="tab-btn-chats" onclick="switchTab('chats')">
+                <span class="nav-icon">💬</span><span>Chats</span>
+            </button>
+            <button class="nav-item" id="tab-btn-updates" onclick="switchTab('updates')">
+                <span class="nav-icon">⭕</span><span>Updates</span>
+            </button>
+            <button class="nav-item" id="tab-btn-communities" onclick="switchTab('communities')">
+                <span class="nav-icon">👥</span><span>Communities</span>
+            </button>
+            <button class="nav-item" id="tab-btn-settings" onclick="switchTab('settings')">
+                <span class="nav-icon">⚙️</span><span>Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="story-upload-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
+        <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:20px; box-sizing:border-box; text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b>স্টোরি পাবলিশ করুন</b>
+                <span style="cursor:pointer; font-weight:bold; font-size:18px;" onclick="closeStoryUploadModal()">✕</span>
+            </div>
+            <div style="margin-bottom:12px;">
+                <img id="story-modal-preview" style="width:100%; max-height:180px; object-fit:contain; border-radius:8px; background:#000;" src="">
+            </div>
+            <div class="form-group">
+                <label>স্টোরি টাইটেল / ক্যাপশন:</label>
+                <input type="text" id="story-caption-input" placeholder="আপনার মনের কথা বা টাইটেল লিখুন...">
+            </div>
+            <button class="btn-primary" onclick="confirmUploadStory()">স্টোরি দিন</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="group-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
+        <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:20px; box-sizing:border-box;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b>গ্রুপ তৈরি করুন</b>
+                <span style="cursor:pointer; font-weight:bold; font-size:18px;" onclick="closeCreateGroupModal()">✕</span>
+            </div>
+            <div style="text-align:center; margin-bottom:12px;">
+                <div class="profile-container-edit" onclick="document.getElementById('group-img-file-input').click()" title="গ্রুপের ছবি দিন">
+                    <img id="group-img-preview" class="profile-preview" style="width:80px; height:80px;" src="https://via.placeholder.com/150/00a884/ffffff?text=GROUP">
+                    <div class="profile-edit-overlay" style="width:24px; height:24px; font-size:11px;">📷</div>
+                </div>
+                <input type="file" id="group-img-file-input" accept="image/*" style="display:none;">
+            </div>
+            <div class="form-group">
+                <label>গ্রুপের নাম:</label>
+                <input type="text" id="group-name-input" placeholder="যেমন: বন্ধুরা একসঙ্গে">
+            </div>
+            <div class="form-group">
+                <label>গ্রুপের টাইটেল / বিবরণ:</label>
+                <input type="text" id="group-title-input" placeholder="যেমন: শুধু আমাদের আড্ডা জোন">
+            </div>
+            <button class="btn-primary" onclick="createGroupAction()">গ্রুপ তৈরি করুন</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-group-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
+        <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:20px; box-sizing:border-box;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b>গ্রুপ সেটিংস ও এডিট</b>
+                <span style="cursor:pointer; font-weight:bold; font-size:18px;" onclick="closeEditGroupModal()">✕</span>
+            </div>
+            <div style="text-align:center; margin-bottom:12px;">
+                <div class="profile-container-edit" onclick="document.getElementById('edit-group-img-file').click()" title="গ্রুপের ছবি পরিবর্তন করুন">
+                    <img id="edit-group-img-preview" class="profile-preview" style="width:80px; height:80px;" src="https://via.placeholder.com/150">
+                    <div class="profile-edit-overlay" style="width:24px; height:24px; font-size:11px;">📷</div>
+                </div>
+                <input type="file" id="edit-group-img-file" accept="image/*" style="display:none;">
+            </div>
+            <div class="form-group">
+                <label>গ্রুপের নাম:</label>
+                <input type="text" id="edit-group-name">
+            </div>
+            <div class="form-group">
+                <label>গ্রুপের টাইটেল / বিবরণ:</label>
+                <input type="text" id="edit-group-title">
+            </div>
+            <button class="btn-primary" onclick="saveGroupEditAction()">পরিবর্তন সেভ করুন</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-member-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
+        <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:20px; box-sizing:border-box; max-height:80vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <b>গ্রুপে বন্ধু যোগ করুন</b>
+                <span style="cursor:pointer; font-weight:bold; font-size:18px;" onclick="closeAddMemberModal()">✕</span>
+            </div>
+            <div id="friends-list-container" style="flex:1; overflow-y:auto; max-height:250px; margin-bottom:10px;"></div>
+            <button class="btn-primary" onclick="closeAddMemberModal()">সম্পন্ন</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="sticker-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
+        <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <b>স্টিকার ও ইমোজি প্যাক</b>
+                <span style="cursor:pointer; font-weight:bold; font-size:18px;" onclick="closeStickerModal()">✕</span>
+            </div>
+            <div class="sticker-grid">
+                <div class="sticker-item" onclick="sendSticker('😀')">😀</div>
+                <div class="sticker-item" onclick="sendSticker('😂')">😂</div>
+                <div class="sticker-item" onclick="sendSticker('😍')">😍</div>
+                <div class="sticker-item" onclick="sendSticker('🔥')">🔥</div>
+                <div class="sticker-item" onclick="sendSticker('👍')">👍</div>
+                <div class="sticker-item" onclick="sendSticker('🎉')">🎉</div>
+                <div class="sticker-item" onclick="sendSticker('❤️')">❤️</div>
+                <div class="sticker-item" onclick="sendSticker('😎')">😎</div>
+                <div class="sticker-item" onclick="sendSticker('😢')">😢</div>
+                <div class="sticker-item" onclick="sendSticker('🙏')">🙏</div>
+                <div class="sticker-item" onclick="sendSticker('🚀')">🚀</div>
+                <div class="sticker-item" onclick="sendSticker('⭐')">⭐</div>
+                <div class="sticker-item" onclick="sendSticker('👏')">👏</div>
+                <div class="sticker-item" onclick="sendSticker('👑')">👑</div>
+                <div class="sticker-item" onclick="sendSticker('🌹')">🌹</div>
+                <div class="sticker-item" onclick="sendSticker('💡')">💡</div>
+                <div class="sticker-item" onclick="sendSticker('⚡')">⚡</div>
+                <div class="sticker-item" onclick="sendSticker('🎁')">🎁</div>
+                <div class="sticker-item" onclick="sendSticker('🐱')">🐱</div>
+                <div class="sticker-item" onclick="sendSticker('🐶')">🐶</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="image-viewer-modal" onclick="closeImageViewer()">
+        <button id="image-viewer-close">✕</button>
+        <img id="fullscreen-img-src" src="">
+        <p id="fullscreen-img-caption" style="color: white; margin-top: 15px; font-size: 16px; font-weight: bold; text-align:center;"></p>
+    </div>
+
+    <div id="msg-context-menu" class="msg-context-menu">
+        <div id="delete-msg-btn">ডার্লিট করুন (Delete)</div>
+    </div>
+
+    <div id="group-context-menu" class="msg-context-menu">
+        <div id="delete-group-btn" style="color:#e74c3c;">গ্রুপ ডিলিট করুন</div>
+    </div>
+
+    <div id="chat-screen">
+        <div class="chat-header">
+            <button class="back-btn" onclick="closeChat()">⬅️</button>
+            <div class="avatar-container" onclick="previewTargetProfile()">
+                <img id="chat-user-img" class="avatar" style="width:38px; height:38px;">
+                <span id="chat-target-status-dot" class="status-dot" style="width:10px; height:10px; bottom:0; right:0;"></span>
+            </div>
+            <div style="cursor:pointer; flex:1; min-width:0;" onclick="previewTargetProfile()">
+                <h4 id="chat-user-name" style="margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">...</h4>
+                <p style="font-size:11px; color:#e2e8f0; margin:0;" id="chat-status">অফলাইন</p>
+            </div>
+            <button id="group-edit-btn" class="icon-btn" style="color:#fff; display:none; font-size:20px; margin-right:5px;" onclick="openEditGroupModal()" title="গ্রুপ এডিট">⚙️</button>
+            <button id="group-add-member-btn" class="icon-btn" style="color:#fff; display:none; font-size:22px; margin-right:5px;" onclick="openAddMemberModal()" title="সদস্য যোগ করুন">➕👤</button>
+        </div>
+        
+        <div class="chat-body" id="chat-messages" onclick="hideContextMenu()"></div>
+        
+        <div class="chat-input-area">
+            <div class="input-pill-box">
+                <button class="icon-btn" type="button" onclick="openStickerModal()">😊</button>
+                <input type="text" id="chat-input-text" placeholder="মেসেজ লিখুন...">
+                <button class="icon-btn" type="button" onclick="document.getElementById('chat-file-input').click()">📎</button>
+            </div>
+            <button class="send-btn" id="send-msg-btn" type="button">➤</button>
+            <button class="send-btn" id="record-audio-btn" type="button" style="background:#54656f;" onclick="toggleVoiceRecording()">🎤</button>
+            <input type="file" id="chat-file-input" accept="image/*,video/*" style="display:none;">
+            <input type="file" id="story-file-input" accept="image/*" style="display:none;">
+        </div>
+    </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDEmxPZisclLYns5MKnj-ar9fSOjZ_Glho",
+        authDomain: "my-incame-chait.firebaseapp.com",
+        databaseURL: "https://my-incame-chait-default-rtdb.firebaseio.com",
+        projectId: "my-incame-chait",
+        storageBucket: "my-incame-chait.appspot.com",
+        messagingSenderId: "610034577258",
+        appId: "1:610034577258:web:cd870a6960a697258ebf13"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const IMGBB_API_KEY = "d617dab9d2117228e38549791d42104a";
+
+    let currentUser = null;
+    let activeChatTarget = null;
+    let currentChatRef = null;
+    let selectedProfileImageUrl = null;
+    let newGroupPhotoUrl = 'https://via.placeholder.com/150/00a884/ffffff?text=GROUP';
+    let editGroupPhotoUrl = '';
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let targetStatusListener = null;
+    let activeLongPressMsgKey = null;
+    let activeLongPressGroupId = null;
+    let pendingStoryFile = null;
+
+    function toggleAuthForms(type) {
+        document.getElementById('login-box').style.display = type === 'register' ? 'none' : 'block';
+        document.getElementById('register-box').style.display = type === 'register' ? 'block' : 'none';
+    }
+
+    document.getElementById('email-reg-btn').onclick = () => {
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        if(!name || !email || !password) return alert('সকল ঘর পূরণ করুন!');
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(res => res.user.updateProfile({ displayName: name }))
+            .catch(err => alert(err.message));
+    };
+
+    document.getElementById('email-login-btn').onclick = () => {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        if(!email || !password) return alert('ইমেইল ও পাসওয়ার্ড দিন!');
+        auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+    };
+
+    document.getElementById('google-login').onclick = () => {
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert(err.message));
+    };
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            
+            const userStatusDatabaseRef = db.ref('users/' + user.uid + '/status');
+            const userLastSeenRef = db.ref('users/' + user.uid + '/lastSeen');
+            const connectedRef = db.ref('.info/connected');
+
+            connectedRef.on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    userStatusDatabaseRef.onDisconnect().set('offline');
+                    userLastSeenRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+                    userStatusDatabaseRef.set('online');
+                }
+            });
+
+            const userRef = db.ref('users/' + user.uid);
+            userRef.once('value', snapshot => {
+                if (!snapshot.exists()) {
+                    const customID = 'ID-' + Math.floor(1000 + Math.random() * 9000);
+                    userRef.set({
+                        uid: user.uid,
+                        name: user.displayName || 'User',
+                        email: user.email,
+                        photoURL: user.photoURL || 'https://via.placeholder.com/150',
+                        customID: customID,
+                        statusText: 'Hey there! I am using Private Message.',
+                        status: 'online'
+                    });
+                    document.getElementById('my-user-id').innerText = customID;
+                } else {
+                    document.getElementById('my-user-id').innerText = snapshot.val().customID;
+                    userRef.update({ status: 'online' });
+                }
+            });
+            switchTab('chats');
+        } else {
+            if (currentUser) {
+                db.ref('users/' + currentUser.uid).update({
+                    status: 'offline',
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            document.getElementById('auth-page').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    });
+
+    document.getElementById('search-input').oninput = (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        const container = document.getElementById('main-content');
+        if (query.length < 1) { switchTab('chats'); return; }
+
+        db.ref('users').once('value', snapshot => {
+            container.innerHTML = '';
+            let found = false;
+            snapshot.forEach(child => {
+                const u = child.val();
+                if(u.uid !== currentUser.uid) {
+                    const nameMatch = u.name && u.name.toLowerCase().includes(query);
+                    const idMatch = u.customID && u.customID.toLowerCase().includes(query);
+                    if(nameMatch || idMatch) {
+                        found = true;
+                        container.appendChild(createUserCard(u));
+                    }
+                }
+            });
+            if(!found) {
+                container.innerHTML = '<p style="text-align:center; padding:20px; color:red;">কোনো ইউজার পাওয়া যায়নি!</p>';
+            }
+        });
+    };
+
+    function createUserCard(user) {
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        const isOnline = user.status === 'online';
+        
+        div.innerHTML = `
+            <div class="avatar-container" onclick="event.stopPropagation(); openFullscreenImage('${user.photoURL || 'https://via.placeholder.com/150'}', '${user.name}')">
+                <img class="avatar" src="${user.photoURL || 'https://via.placeholder.com/150'}">
+                <span class="status-dot ${isOnline ? 'online' : ''}" id="card-dot-${user.uid}"></span>
+            </div>
+            <div class="user-info" onclick="openPrivateChat(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                <h4>${user.name}</h4>
+                <p id="card-status-text-${user.uid}">${isOnline ? 'অনলাইন' : formatLastSeen(user.lastSeen)}</p>
+            </div>
+        `;
+
+        db.ref('users/' + user.uid).on('value', (snapshot) => {
+            const updatedUser = snapshot.val();
+            if(updatedUser) {
+                const dot = div.querySelector(`#card-dot-${user.uid}`);
+                const text = div.querySelector(`#card-status-text-${user.uid}`);
+                if(updatedUser.status === 'online') {
+                    if(dot) dot.classList.add('online');
+                    if(text) text.innerText = 'অনলাইন';
+                } else {
+                    if(dot) dot.classList.remove('online');
+                    if(text) text.innerText = formatLastSeen(updatedUser.lastSeen);
+                }
+            }
+        });
+
+        return div;
+    }
+
+    function createGroupCard(group) {
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.id = 'group-card-' + group.id;
+        div.innerHTML = `
+            <div class="avatar-container">
+                <img class="avatar" src="${group.photoURL || 'https://via.placeholder.com/150/00a884/ffffff?text=GROUP'}">
+            </div>
+            <div class="user-info" onclick='openGroupChat(${JSON.stringify(group)})'>
+                <h4>👥 ${group.name}</h4>
+                <p>${group.title || 'গ্রুপ চ্যাট রুম'}</p>
+            </div>
+        `;
+
+        if (group.createdBy === currentUser.uid) {
+            let pressTimer;
+            const startPress = (e) => {
+                pressTimer = setTimeout(() => {
+                    showGroupContextMenu(e, group.id);
+                }, 600);
+            };
+
+            const cancelPress = () => {
+                clearTimeout(pressTimer);
+            };
+
+            div.addEventListener('touchstart', startPress);
+            div.addEventListener('touchend', cancelPress);
+            div.addEventListener('touchmove', cancelPress);
+
+            div.addEventListener('mousedown', startPress);
+            div.addEventListener('mouseup', cancelPress);
+            div.addEventListener('mouseleave', cancelPress);
+        }
+
+        return div;
+    }
+
+    function showGroupContextMenu(e, groupId) {
+        e.preventDefault();
+        activeLongPressGroupId = groupId;
+        const menu = document.getElementById('group-context-menu');
+        
+        let clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 150);
+        let clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 200);
+
+        menu.style.display = 'block';
+        menu.style.left = Math.min(clientX, window.innerWidth - 150) + 'px';
+        menu.style.top = Math.min(clientY, window.innerHeight - 80) + 'px';
+    }
+
+    function hideGlobalContextMenu() {
+        document.getElementById('msg-context-menu').style.display = 'none';
+        document.getElementById('group-context-menu').style.display = 'none';
+        activeLongPressMsgKey = null;
+        activeLongPressGroupId = null;
+    }
+
+    document.getElementById('delete-group-btn').onclick = () => {
+        if (activeLongPressGroupId) {
+            if (confirm("আপনি কি নিশ্চিতভাবে এই গ্রুপটি ডিলিট করতে চান?")) {
+                db.ref('groups/' + activeLongPressGroupId).remove();
+                db.ref('group_chats/' + activeLongPressGroupId).remove();
+                hideGlobalContextMenu();
+                switchTab('chats');
+            }
+        }
+    };
+
+    function formatLastSeen(timestamp) {
+        if(!timestamp) return 'অফলাইন';
+        const date = new Date(timestamp);
+        return `শেষ দেখা: ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    function openPrivateChat(targetUser) {
+        activeChatTarget = targetUser;
+        document.getElementById('chat-user-name').innerText = targetUser.name;
+        document.getElementById('chat-user-img').src = targetUser.photoURL || 'https://via.placeholder.com/150';
+        document.getElementById('chat-target-status-dot').style.display = 'inline-block';
+        document.getElementById('group-add-member-btn').style.display = 'none';
+        document.getElementById('group-edit-btn').style.display = 'none';
+        document.getElementById('chat-screen').style.display = 'flex';
+
+        if(targetStatusListener) targetStatusListener.off();
+        targetStatusListener = db.ref('users/' + targetUser.uid);
+        targetStatusListener.on('value', (snapshot) => {
+            const uData = snapshot.val();
+            const dot = document.getElementById('chat-target-status-dot');
+            const statusText = document.getElementById('chat-status');
+            if(uData && uData.status === 'online') {
+                dot.classList.add('online');
+                statusText.innerText = 'অনলাইন';
+            } else {
+                dot.classList.remove('online');
+                statusText.innerText = uData ? formatLastSeen(uData.lastSeen) : 'অফলাইন';
+            }
+        });
+
+        const chatRoomID = currentUser.uid < targetUser.uid ? `${currentUser.uid}_${targetUser.uid}` : `${targetUser.uid}_${currentUser.uid}`;
+        setupChatListener('private_chats/' + chatRoomID);
+    }
+
+    function openGroupChat(group) {
+        activeChatTarget = { uid: group.id, name: group.name, title: group.title, photoURL: group.photoURL, createdBy: group.createdBy, isGroup: true };
+        document.getElementById('chat-user-name').innerText = group.name;
+        document.getElementById('chat-user-img').src = group.photoURL || 'https://via.placeholder.com/150/00a884/ffffff?text=GROUP';
+        document.getElementById('chat-target-status-dot').style.display = 'none';
+        document.getElementById('chat-status').innerText = group.title || 'গ্রুপ চ্যাট রুম';
+        document.getElementById('group-add-member-btn').style.display = 'block';
+        document.getElementById('group-edit-btn').style.display = 'block';
+        document.getElementById('chat-screen').style.display = 'flex';
+
+        setupChatListener('group_chats/' + group.id);
+
+        db.ref('groups/' + group.id).on('value', (snapshot) => {
+            const updated = snapshot.val();
+            if(updated && activeChatTarget && activeChatTarget.isGroup && activeChatTarget.uid === group.id) {
+                activeChatTarget.name = updated.name;
+                activeChatTarget.title = updated.title;
+                activeChatTarget.photoURL = updated.photoURL;
+                document.getElementById('chat-user-name').innerText = updated.name;
+                document.getElementById('chat-status').innerText = updated.title || 'গ্রুপ চ্যাট রুম';
+                document.getElementById('chat-user-img').src = updated.photoURL || 'https://via.placeholder.com/150/00a884/ffffff?text=GROUP';
+            }
+        });
+    }
+
+    window.openFullscreenImage = function(imgSrc, captionText = '') {
+        document.getElementById('fullscreen-img-src').src = imgSrc;
+        document.getElementById('fullscreen-img-caption').innerText = captionText;
+        document.getElementById('image-viewer-modal').style.display = 'flex';
+    };
+
+    window.closeImageViewer = function() {
+        document.getElementById('image-viewer-modal').style.display = 'none';
+    };
+
+    function previewTargetProfile() {
+        if(activeChatTarget) {
+            if(!activeChatTarget.isGroup && activeChatTarget.photoURL) {
+                openFullscreenImage(activeChatTarget.photoURL, activeChatTarget.name);
+            } else if(activeChatTarget.isGroup && activeChatTarget.photoURL) {
+                openFullscreenImage(activeChatTarget.photoURL, activeChatTarget.name);
+            }
+        }
+    }
+
+    function setupChatListener(path) {
+        if(currentChatRef) currentChatRef.off();
+        currentChatRef = db.ref(path);
+        document.getElementById('chat-messages').innerHTML = '';
+
+        currentChatRef.on('child_added', snapshot => {
+            appendMessage(snapshot.key, snapshot.val());
+        });
+
+        currentChatRef.on('child_removed', snapshot => {
+            const el = document.getElementById('msg-row-' + snapshot.key);
+            if(el) el.remove();
+        });
+    }
+
+    function closeChat() {
+        if(targetStatusListener && activeChatTarget) {
+            targetStatusListener.off();
+        }
+        document.getElementById('chat-target-status-dot').style.display = 'inline-block';
+        document.getElementById('group-add-member-btn').style.display = 'none';
+        document.getElementById('group-edit-btn').style.display = 'none';
+        document.getElementById('chat-screen').style.display = 'none';
+        document.getElementById('chat-messages').innerHTML = '';
+        hideGlobalContextMenu();
+        if(currentChatRef) currentChatRef.off();
+    }
+
+    document.getElementById('send-msg-btn').onclick = () => {
+        const text = document.getElementById('chat-input-text').value.trim();
+        if(!text) return;
+        currentChatRef.push({
+            sender: currentUser.uid,
+            senderName: currentUser.displayName || 'User',
+            text: text,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        document.getElementById('chat-input-text').value = '';
+    };
+
+    function appendMessage(key, msg) {
+        const isMe = msg.sender === currentUser.uid;
+        const div = document.createElement('div');
+        div.className = `msg-row ${isMe ? 'sent' : 'recv'}`;
+        div.id = 'msg-row-' + key;
+        const timeStr = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let senderNameHTML = (!isMe && activeChatTarget && activeChatTarget.isGroup) ? `<div style="font-size:11px; font-weight:bold; color:#00a884; margin-bottom:2px;">${msg.senderName || 'Member'}</div>` : '';
+
+        let tickHTML = '';
+        if (isMe) {
+            let isTargetOnline = false;
+            const statusDot = document.getElementById('chat-target-status-dot');
+            if (statusDot && statusDot.classList.contains('online')) {
+                isTargetOnline = true;
+            }
+            tickHTML = `<span style="font-size: 13px; color: ${isTargetOnline ? '#53bdeb' : '#667781'}; margin-left: 3px; font-weight: bold;">${isTargetOnline ? '✓✓' : '✓'}</span>`;
+        }
+
+        div.innerHTML = `
+            <div class="msg-bubble-wrapper" id="msg-bubble-${key}">
+                <div class="msg">
+                    ${senderNameHTML}
+                    ${msg.text ? msg.text : ''}
+                    ${msg.image ? `<img src="${msg.image}" onclick="openFullscreenImage('${msg.image}')">` : ''}
+                    ${msg.video ? `<video controls src="${msg.video}"></video>` : ''}
+                    ${msg.audio ? `<audio controls src="${msg.audio}"></audio>` : ''}
+                    <div class="msg-meta">
+                        <span>${timeStr}</span>
+                        ${tickHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const bubbleEl = div.querySelector(`#msg-bubble-${key}`);
+        
+        if (isMe) {
+            let pressTimer;
+            const startPress = (e) => {
+                pressTimer = setTimeout(() => {
+                    showContextMenu(e, key);
+                }, 600);
+            };
+
+            const cancelPress = () => {
+                clearTimeout(pressTimer);
+            };
+
+            bubbleEl.addEventListener('touchstart', startPress);
+            bubbleEl.addEventListener('touchend', cancelPress);
+            bubbleEl.addEventListener('touchmove', cancelPress);
+
+            bubbleEl.addEventListener('mousedown', startPress);
+            bubbleEl.addEventListener('mouseup', cancelPress);
+            bubbleEl.addEventListener('mouseleave', cancelPress);
+        }
+
+        const body = document.getElementById('chat-messages');
+        body.appendChild(div);
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function showContextMenu(e, msgKey) {
+        e.preventDefault();
+        activeLongPressMsgKey = msgKey;
+        const menu = document.getElementById('msg-context-menu');
+        
+        let clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 150);
+        let clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 200);
+
+        menu.style.display = 'block';
+        menu.style.left = Math.min(clientX, window.innerWidth - 140) + 'px';
+        menu.style.top = Math.min(clientY, window.innerHeight - 80) + 'px';
+    }
+
+    document.getElementById('delete-msg-btn').onclick = () => {
+        if(activeLongPressMsgKey && currentChatRef) {
+            currentChatRef.child(activeLongPressMsgKey).remove()
+                .then(() => {
+                    hideGlobalContextMenu();
+                })
+                .catch(err => alert("ডিলিট করতে সমস্যা হয়েছে: " + err.message));
+        }
+    };
+
+    document.getElementById('chat-file-input').onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const fileData = evt.target.result;
+            if (file.type.startsWith('image/')) {
+                currentChatRef.push({
+                    sender: currentUser.uid,
+                    senderName: currentUser.displayName || 'User',
+                    image: fileData,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            } else if (file.type.startsWith('video/')) {
+                currentChatRef.push({
+                    sender: currentUser.uid,
+                    senderName: currentUser.displayName || 'User',
+                    video: fileData,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    function openStickerModal() { document.getElementById('sticker-modal').style.display = 'flex'; }
+    function closeStickerModal() { document.getElementById('sticker-modal').style.display = 'none'; }
+    window.sendSticker = function(emoji) {
+        closeStickerModal();
+        currentChatRef.push({
+            sender: currentUser.uid,
+            senderName: currentUser.displayName || 'User',
+            text: `<span style="font-size:36px;">${emoji}</span>`,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+    };
+
+    function toggleVoiceRecording() {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        currentChatRef.push({
+                            sender: currentUser.uid,
+                            senderName: currentUser.displayName || 'User',
+                            audio: e.target.result,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    };
+                    reader.readAsDataURL(audioBlob);
+                };
+                mediaRecorder.start();
+                document.getElementById('record-audio-btn').style.background = '#e74c3c';
+            }).catch(() => alert("মাইক্রোফোন পারমিশন পাওয়া যায়নি!"));
+        } else {
+            mediaRecorder.stop();
+            document.getElementById('record-audio-btn').style.background = '#54656f';
+        }
+    }
+
+    document.getElementById('group-img-file-input').onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        uploadImageToImgBB(file, (url) => {
+            newGroupPhotoUrl = url;
+            document.getElementById('group-img-preview').src = url;
+        });
+    };
+
+    function openCreateGroupModal() {
+        newGroupPhotoUrl = 'https://via.placeholder.com/150/00a884/ffffff?text=GROUP';
+        document.getElementById('group-img-preview').src = newGroupPhotoUrl;
+        document.getElementById('group-name-input').value = '';
+        document.getElementById('group-title-input').value = '';
+        document.getElementById('group-modal').style.display = 'flex';
+    }
+    function closeCreateGroupModal() { document.getElementById('group-modal').style.display = 'none'; }
+    
+    function createGroupAction() {
+        const groupName = document.getElementById('group-name-input').value.trim();
+        const groupTitle = document.getElementById('group-title-input').value.trim();
+        if(!groupName) return alert('গ্রুপের নাম লিখুন!');
+        
+        const newGroupRef = db.ref('groups').push();
+        const groupData = {
+            id: newGroupRef.key,
+            name: groupName,
+            title: groupTitle || 'গ্রুপ চ্যাট রুম',
+            photoURL: newGroupPhotoUrl,
+            createdBy: currentUser.uid,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        newGroupRef.set(groupData).then(() => {
+            db.ref('groups/' + newGroupRef.key + '/members/' + currentUser.uid).set(true);
+            closeCreateGroupModal();
+            alert('গ্রুপ তৈরি সফল হয়েছে!');
+            switchTab('chats');
+        }).catch(err => {
+            alert("গ্রুপ তৈরি করতে সমস্যা হয়েছে: " + err.message);
+        });
+    }
+
+    function openEditGroupModal() {
+        if(!activeChatTarget || !activeChatTarget.isGroup) return;
+        editGroupPhotoUrl = activeChatTarget.photoURL || 'https://via.placeholder.com/150';
+        document.getElementById('edit-group-img-preview').src = editGroupPhotoUrl;
+        document.getElementById('edit-group-name').value = activeChatTarget.name || '';
+        document.getElementById('edit-group-title').value = activeChatTarget.title || '';
+        document.getElementById('edit-group-modal').style.display = 'flex';
+    }
+
+    function closeEditGroupModal() {
+        document.getElementById('edit-group-modal').style.display = 'none';
+    }
+
+    document.getElementById('edit-group-img-file').onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        uploadImageToImgBB(file, (url) => {
+            editGroupPhotoUrl = url;
+            document.getElementById('edit-group-img-preview').src = url;
+        });
+    };
+
+    function saveGroupEditAction() {
+        if(!activeChatTarget || !activeChatTarget.isGroup) return;
+        const groupId = activeChatTarget.uid;
+        const newName = document.getElementById('edit-group-name').value.trim();
+        const newTitle = document.getElementById('edit-group-title').value.trim();
+
+        if(!newName) return alert('গ্রুপের নাম খালি রাখা যাবে না!');
+
+        db.ref('groups/' + groupId).update({
+            name: newName,
+            title: newTitle,
+            photoURL: editGroupPhotoUrl
+        }).then(() => {
+            closeEditGroupModal();
+            alert('গ্রুপ সফলভাবে আপডেট করা হয়েছে!');
+        }).catch(err => {
+            alert('গ্রুপ আপডেট করতে সমস্যা হয়েছে: ' + err.message);
+        });
+    }
+
+    function uploadImageToImgBB(file, callback) {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const uploadMsgBox = document.createElement('div');
+        uploadMsgBox.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:8px 15px; border-radius:20px; font-size:12px; z-index:9999;";
+        uploadMsgBox.innerText = "ছবি আপলোড হচ্ছে...";
+        document.body.appendChild(uploadMsgBox);
+
+        fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.body.removeChild(uploadMsgBox);
+            if (data && data.success) {
+                callback(data.data.url);
+            } else {
+                alert("ছবি আপলোড ব্যর্থ হয়েছে!");
+            }
+        })
+        .catch(err => {
+            document.body.removeChild(uploadMsgBox);
+            alert("নেটওয়ার্ক সমস্যা: " + err.message);
+        });
+    }
+
+    function openAddMemberModal() {
+        if(!activeChatTarget || !activeChatTarget.isGroup) return;
+        const container = document.getElementById('friends-list-container');
+        container.innerHTML = '<p style="text-align:center; color:gray;">লোড হচ্ছে...</p>';
+        document.getElementById('add-member-modal').style.display = 'flex';
+
+        db.ref('users').once('value', snapshot => {
+            container.innerHTML = '';
+            snapshot.forEach(child => {
+                const u = child.val();
+                if(u.uid !== currentUser.uid) {
+                    const item = document.createElement('div');
+                    item.className = 'user-item';
+                    item.style.marginBottom = '6px';
+                    item.innerHTML = `
+                        <img class="avatar" style="width:40px; height:40px;" src="${u.photoURL || 'https://via.placeholder.com/150'}">
+                        <div class="user-info">
+                            <h4 style="font-size:14px; margin:0;">${u.name}</h4>
+                            <p style="font-size:11px; margin:0;">${u.customID || ''}</p>
+                        </div>
+                        <button class="create-group-btn" id="add-btn-${u.uid}" onclick="addFriendToGroup('${u.uid}', '${u.name}')">অ্যাড করুন</button>
+                    `;
+                    container.appendChild(item);
+                }
+            });
+        });
+    }
+
+    function closeAddMemberModal() {
+        document.getElementById('add-member-modal').style.display = 'none';
+    }
+
+    window.addFriendToGroup = function(friendUid, friendName) {
+        if(!activeChatTarget || !activeChatTarget.isGroup) return;
+        const groupId = activeChatTarget.uid;
+
+        db.ref('groups/' + groupId + '/members/' + friendUid).set(true).then(() => {
+            const btn = document.getElementById('add-btn-' + friendUid);
+            if(btn) {
+                btn.innerText = 'অ্যাড হয়েছে ✓';
+                btn.style.background = '#ccc';
+                btn.disabled = true;
+            }
+            db.ref('group_chats/' + groupId).push({
+                sender: 'system',
+                senderName: 'System',
+                text: `${friendName} কে গ্রুপে যুক্ত করা হয়েছে।`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }).catch(err => {
+            alert("সদস্য যুক্ত করতে সমস্যা হয়েছে: " + err.message);
+        });
+    };
+
+    function switchTab(tab) {
+        const container = document.getElementById('main-content');
+        container.innerHTML = '';
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+
+        if (tab === 'chats') {
+            document.getElementById('tab-btn-chats').classList.add('active');
+            document.getElementById('page-title').innerText = "Chats";
+            document.getElementById('search-container').style.display = "flex";
+            
+            db.ref('groups').on('value', snapshot => {
+                const existingGroups = container.querySelectorAll('.user-item');
+                existingGroups.forEach(el => {
+                    if(el.id && el.id.startsWith('group-card-')) el.remove();
+                });
+
+                snapshot.forEach(child => {
+                    const group = child.val();
+                    container.prepend(createGroupCard(group));
+                });
+            });
+
+            db.ref('users').limitToLast(20).once('value', snapshot => {
+                snapshot.forEach(child => {
+                    if(child.val().uid !== currentUser.uid) container.appendChild(createUserCard(child.val()));
+                });
+            });
+        } else if (tab === 'updates') {
+            document.getElementById('tab-btn-updates').classList.add('active');
+            document.getElementById('page-title').innerText = "Updates (Status)";
+            document.getElementById('search-container').style.display = "none";
+
+            let storyHtml = `
+                <div class="panel-box" style="margin-bottom:10px;">
+                    <h3 style="margin:0 0 10px 0; font-size:15px;">স্ট্যাটাস / স্টোরি</h3>
+                    <div class="story-container" id="story-list-container">
+                        <div class="story-circle" onclick="document.getElementById('story-file-input').click()">
+                            <div class="story-ring add-story-ring">＋</div>
+                            <span>আমার স্টোরি</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = storyHtml;
+
+            document.getElementById('story-file-input').onchange = (e) => {
+                const file = e.target.files[0];
+                if(!file) return;
+                pendingStoryFile = file;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    document.getElementById('story-modal-preview').src = evt.target.result;
+                    document.getElementById('story-caption-input').value = '';
+                    document.getElementById('story-upload-modal').style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            };
+
+            db.ref('stories').on('value', snapshot => {
+                const storyContainer = document.getElementById('story-list-container');
+                if(!storyContainer) return;
+                storyContainer.innerHTML = `
+                    <div class="story-circle" onclick="document.getElementById('story-file-input').click()">
+                        <div class="story-ring add-story-ring">＋</div>
+                        <span>আমার স্টোরি</span>
+                    </div>
+                `;
+                
+                const now = Date.now();
+                snapshot.forEach(child => {
+                    const st = child.val();
+                    
+                    // ২৪ ঘণ্টা পার হলে স্টোরি স্বয়ংক্রিয়ভাবে মুছে ফেলা
+                    if (st.expiresAt && now > st.expiresAt) {
+                        db.ref('stories/' + st.uid).remove();
+                        return;
+                    }
+
+                    const storyDiv = document.createElement('div');
+                    storyDiv.className = 'story-circle';
+                    storyDiv.innerHTML = `
+                        <div class="story-ring">
+                            <img src="${st.photoURL}">
+                        </div>
+                        <span>${st.uid === currentUser.uid ? 'আমার স্টোরি' : st.name}</span>
+                    `;
+                    
+                    // নিজের স্টোরি হলে ক্লিক করলে ডিলিট করার অপশন এবং অন্যের স্টোরি হলে দেখার অপশন
+                    storyDiv.onclick = () => {
+                        if (st.uid === currentUser.uid) {
+                            if (confirm("আপনি কি আপনার এই স্টোরিটি ডিলিট করতে চান?")) {
+                                db.ref('stories/' + currentUser.uid).remove().then(() => {
+                                    alert('স্টোরি ডিলিট করা হয়েছে!');
+                                });
+                            }
+                        } else {
+                            openFullscreenImage(st.storyImg, `${st.name}: ${st.caption || ''}`);
+                        }
+                    };
+
+                    storyContainer.appendChild(storyDiv);
+                });
+            });
+
+        } else if (tab === 'communities') {
+            document.getElementById('tab-btn-communities').classList.add('active');
+            document.getElementById('page-title').innerText = "Communities";
+            document.getElementById('search-container').style.display = "none";
+            container.innerHTML = `<div class="panel-box"><p style="text-align:center;">কমিউনিটি ফিচার শীঘ্রই আসছে...</p></div>`;
+        } else if (tab === 'settings') {
+            document.getElementById('tab-btn-settings').classList.add('active');
+            document.getElementById('page-title').innerText = "Settings";
+            document.getElementById('search-container').style.display = "none";
+
+            const currentLang = localStorage.getItem('appLang') || 'bn';
+
+            db.ref('users/' + currentUser.uid).once('value', snapshot => {
+                const userData = snapshot.val() || {};
+                selectedProfileImageUrl = userData.photoURL || 'https://via.placeholder.com/150';
+
+                container.innerHTML = `
+                    <div class="settings-group">
+                        <div class="profile-container-edit" onclick="document.getElementById('profile-file-input').click()" title="প্রোফাইল ছবি পরিবর্তন করতে ক্লিক করুন">
+                            <img id="profile-preview-img" class="profile-preview" src="${selectedProfileImageUrl}">
+                            <div class="profile-edit-overlay">📷</div>
+                        </div>
+                        <input type="file" id="profile-file-input" accept="image/*" style="display:none;">
+
+                        <div style="width:100%; background:#f0f2f5; padding:8px; border-radius:8px; font-size:13px; font-weight:bold; color:var(--primary-color); text-align:center;">
+                            আপনার আইডি: ${userData.customID}
+                        </div>
+
+                        <label>আপনার নাম</label>
+                        <input type="text" id="update-name" value="${userData.name || ''}">
+
+                        <label>বায়ো / স্ট্যাটাস</label>
+                        <input type="text" id="update-status" value="${userData.statusText || ''}">
+
+                        <label>ভাষা নির্বাচন (Language)</label>
+                        <select id="global-lang-select" onchange="changeAppLanguage(this.value)">
+                            <option value="bn" ${currentLang === 'bn' ? 'selected' : ''}>বাংলা</option>
+                            <option value="en" ${currentLang === 'en' ? 'selected' : ''}>English</option>
+                        </select>
+
+                        <div class="setting-card-item">
+                            <span>নোটিফিকেশন সাউন্ড</span>
+                            <input type="checkbox" checked style="width:18px; height:18px; cursor:pointer;">
+                        </div>
+
+                        <button class="save-btn" onclick="saveProfile()">পরিবর্তন সেভ করুন</button>
+                        <button class="logout-btn" onclick="auth.signOut()">লগ-আউট করুন</button>
+                    </div>
+                `;
+
+                document.getElementById('profile-file-input').onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        document.getElementById('profile-preview-img').src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    uploadImageToImgBB(file, (url) => {
+                        selectedProfileImageUrl = url;
+                        document.getElementById('profile-preview-img').src = selectedProfileImageUrl;
+                        alert("ছবির লিংক তৈরি সফল! এখন নিচে 'পরিবর্তন সেভ করুন' বাটনে ক্লিক করুন।");
+                    });
+                };
+            });
+        }
+    }
+
+    function closeStoryUploadModal() {
+        document.getElementById('story-upload-modal').style.display = 'none';
+        pendingStoryFile = null;
+    }
+
+    function confirmUploadStory() {
+        if(!pendingStoryFile) return;
+        const caption = document.getElementById('story-caption-input').value.trim();
+        const currentTime = Date.now();
+        const expireTime = currentTime + (24 * 60 * 60 * 1000); // ২৪ ঘণ্টা মেয়াদ
+        
+        uploadImageToImgBB(pendingStoryFile, (imgData) => {
+            db.ref('stories/' + currentUser.uid).set({
+                uid: currentUser.uid,
+                name: currentUser.displayName || 'User',
+                photoURL: currentUser.photoURL || 'https://via.placeholder.com/150',
+                storyImg: imgData,
+                caption: caption,
+                timestamp: currentTime,
+                expiresAt: expireTime
+            }).then(() => {
+                closeStoryUploadModal();
+                alert('স্টোরি ও টাইটেল সফলভাবে আপলোড হয়েছে!');
+                switchTab('updates');
+            });
+        });
+    }
+
+    window.saveProfile = function() {
+        const name = document.getElementById('update-name').value.trim();
+        const statusText = document.getElementById('update-status').value.trim();
+        const photoURL = selectedProfileImageUrl || currentUser.photoURL || '';
+
+        currentUser.updateProfile({ displayName: name, photoURL: photoURL }).then(() => {
+            db.ref('users/' + currentUser.uid).update({ name: name, photoURL: photoURL, statusText: statusText }).then(() => {
+                alert('প্রোফাইল সফলভাবে আপডেট করা হয়েছে!');
+            });
+        });
+    };
+
+    function changeAppLanguage(lang) {
+        localStorage.setItem('appLang', lang);
+        alert('ভাষা পরিবর্তন করা হয়েছে!');
+    }
+</script>
+</body>
+</html>
