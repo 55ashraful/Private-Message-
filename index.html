@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Private Message (অটো গুগল প্রোফাইল ও নাম)</title>
+    <title>Private Message (অরজিনাল ইমেইল ও ভেরিফিকেশন)</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -263,7 +263,7 @@
             <h3 style="margin-bottom: 15px; margin-top: 0; color: #1e293b; font-size: 18px;">লগইন করুন</h3>
             <div class="form-group">
                 <label>ইমেইল:</label>
-                <input type="email" id="login-email" placeholder="আপনার ইমেইল দিন">
+                <input type="email" id="login-email" placeholder="আপনার আসল ইমেইল দিন">
             </div>
             <div class="form-group">
                 <label>পাসওয়ার্ড:</label>
@@ -291,14 +291,14 @@
                 <input type="text" id="reg-name" placeholder="পুরো নাম">
             </div>
             <div class="form-group">
-                <label>ইমেইল:</label>
-                <input type="email" id="reg-email" placeholder="ইমেইল দিন">
+                <label>অরজিনাল ইমেইল:</label>
+                <input type="email" id="reg-email" placeholder="যেটিতে ভেরিফিকেশন লিংক যাবে">
             </div>
             <div class="form-group">
                 <label>পাসওয়ার্ড:</label>
                 <input type="password" id="reg-password" placeholder="কমপক্ষে ৬ ডিজিট">
             </div>
-            <button class="btn-primary" id="email-reg-btn">রেজিস্ট্রেশন করুন</button>
+            <button class="btn-primary" id="email-reg-btn">রেজিস্ট্রেশন ও ভেরিফিকেশন পাঠান</button>
 
             <div class="toggle-text">
                 <span>আগে থেকেই অ্যাকাউন্ট আছে? </span> <span onclick="toggleAuthForms('login')">লগইন করুন</span>
@@ -565,24 +565,47 @@
         document.getElementById('register-box').style.display = type === 'register' ? 'block' : 'none';
     }
 
+    // নতুন রেজিস্ট্রেশন করার পর ইমেইলে ভেরিফিকেশন লিংক পাঠানো
     document.getElementById('email-reg-btn').onclick = () => {
         const name = document.getElementById('reg-name').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const password = document.getElementById('reg-password').value;
         if(!name || !email || !password) return alert('সকল ঘর পূরণ করুন!');
+
         auth.createUserWithEmailAndPassword(email, password)
-            .then(res => res.user.updateProfile({ displayName: name }))
+            .then(res => {
+                const user = res.user;
+                user.updateProfile({ displayName: name }).then(() => {
+                    // ভেরিফিকেশন ইমেইল পাঠানো
+                    user.sendEmailVerification().then(() => {
+                        alert('রেজিস্ট্রেশন সফল হয়েছে! আপনার আসল ইমেইলে ( ' + email + ' ) একটি ভেরিফিকেশন লিংক পাঠানো হয়েছে। দয়া করে ইমেইল চেক করে ভেরিফাই করুন, তারপর লগইন করুন।');
+                        auth.signOut();
+                        toggleAuthForms('login');
+                    }).catch(err => alert('ভেরিফিকেশন ইমেইল পাঠাতে সমস্যা: ' + err.message));
+                });
+            })
             .catch(err => alert(err.message));
     };
 
+    // লগইন করার সময় চেক করা যে ইমেইল ভেরিফাই হয়েছে কিনা
     document.getElementById('email-login-btn').onclick = () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
         if(!email || !password) return alert('ইমেইল ও পাসওয়ার্ড দিন!');
-        auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+
+        auth.signInWithEmailAndPassword(email, password)
+            .then(res => {
+                const user = res.user;
+                // চেক করা যাক জিমেইল ভেরিফাই করা হয়েছে কিনা
+                if (!user.emailVerified) {
+                    alert('আপনার ইমেইলটি এখনো ভেরিফাইড নয়! দয়া করে আপনার জিমেইল ইনবক্স চেক করে লিংকটিতে ক্লিক করে ভেরিফাই করুন।');
+                    auth.signOut(); // ভেরিফাই না হলে অ্যাপে ঢুকতে দেবে না
+                }
+            })
+            .catch(err => alert(err.message));
     };
 
-    // গুগল লগইন: জিমেইল থেকে নাম এবং প্রোফাইল পিকচার অটোমেটিক নেওয়ার কোড
+    // গুগল লগইন (গুগল একাউন্ট অলরেডি ভেরিফাইড থাকে)
     document.getElementById('google-login').onclick = () => {
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider).then(result => {
@@ -605,7 +628,6 @@
                         status: 'online'
                     });
                 } else {
-                    // পূর্বের একাউন্ট হলে গুগল থেকে নাম ও ছবি আপডেট করে দেওয়া
                     userRef.update({
                         name: googleName,
                         photoURL: googlePhoto,
@@ -617,7 +639,7 @@
     };
 
     auth.onAuthStateChanged(user => {
-        if (user) {
+        if (user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'))) {
             currentUser = user;
             document.getElementById('auth-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
