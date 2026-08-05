@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Private Message (চূড়ান্ত সংস্করণ - স্টোরি ভিউয়ার ও ভিউ লিস্টসহ)</title>
+    <title>Private Message (স্টাইলিশ লোগো ও কালারফুল পেজ)</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #00a884;
+            --primary-gradient: linear-gradient(135deg, #00a884 0%, #005c4b 100%);
             --send-btn-color: #00a884;
             --bg-color: #efeae2;
             --card-bg: #ffffff;
@@ -34,37 +35,85 @@
             position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden;
         }
 
+        /* স্প্ল্যাশ স্ক্রিন স্টাইল */
+        #splash-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .splash-logo {
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0,168,132,0.3); animation: pulseLogo 1.5s infinite alternate;
+        }
+        @keyframes pulseLogo {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+        .splash-title {
+            margin-top: 15px; font-size: 18px; font-weight: 700; color: var(--primary-color);
+        }
+        .splash-loader {
+            margin-top: 20px; width: 30px; height: 30px; border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color); border-radius: 50%;
+            animation: spinLoader 1s linear infinite;
+        }
+        @keyframes spinLoader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* লগইন/সাইনআপ পেজ কালারফুল ডিজাইন */
         #auth-page {
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            min-height: 100vh; padding: 20px 25px 40px 25px; text-align: center; overflow-y: auto; background: #fff; box-sizing: border-box;
+            min-height: 100vh; padding: 20px 25px 40px 25px; text-align: center; overflow-y: auto; 
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); box-sizing: border-box;
         }
+        
+        .brand-logo-container {
+            width: 65px; height: 65px; border-radius: 50%; object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 168, 132, 0.4); border: 2px solid #fff;
+            margin-bottom: 4px; display: inline-block;
+        }
+
         .auth-card {
-            width: 100%; background: #fff; padding: 15px 20px; border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-top: 10px; margin-bottom: 20px;
+            width: 100%; background: #fff; padding: 20px; border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 168, 132, 0.12); margin-top: 10px; margin-bottom: 20px;
+            border: 1px solid rgba(0, 168, 132, 0.2);
         }
-        .form-group { text-align: left; margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
+        .form-group { text-align: left; margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 5px; color: #334155; }
+        .form-group input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px;
             outline: none; font-size: 14px; box-sizing: border-box; font-family: inherit;
+            transition: all 0.3s; background: #f8fafc;
+        }
+        .form-group input:focus {
+            border-color: var(--primary-color); background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.15);
         }
         .btn-primary {
-            width: 100%; padding: 11px; background: var(--primary-color); color: #fff;
-            border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px;
+            width: 100%; padding: 12px; background: var(--primary-gradient); color: #fff;
+            border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0, 168, 132, 0.3); transition: transform 0.1s;
         }
-        .divider { display: flex; align-items: center; margin: 12px 0; color: gray; font-size: 13px; }
-        .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid #ddd; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .divider { display: flex; align-items: center; margin: 15px 0; color: #94a3b8; font-size: 13px; font-weight: 500; }
+        .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1.5px solid #e2e8f0; }
         .divider::before { margin-right: 10px; }
         .divider::after { margin-left: 10px; }
 
         .google-btn {
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: #fff; border: 1px solid #ccc; padding: 10px;
-            border-radius: 25px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1); width: 100%;
+            background: #fff; border: 1.5px solid #cbd5e1; padding: 11px;
+            border-radius: 28px; font-weight: bold; cursor: pointer; color: #334155;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); width: 100%; transition: background 0.2s;
         }
-        .toggle-text { font-size: 13px; margin-top: 12px; margin-bottom: 10px; }
-        .toggle-text span { color: var(--primary-color); cursor: pointer; font-weight: bold; }
+        .google-btn:hover { background: #f8fafc; }
+
+        .toggle-text { font-size: 13px; margin-top: 15px; color: #64748b; }
+        .toggle-text span:last-child { color: var(--primary-color); cursor: pointer; font-weight: bold; text-decoration: underline; }
 
         .header { padding: 12px 15px; background: var(--header-bg); color: white; display: flex; align-items: center; justify-content: space-between; }
         .search-bar { padding: 8px 12px; background: #fff; border-bottom: 1px solid #eee; display: flex; gap: 8px; align-items: center;}
@@ -196,12 +245,24 @@
 
 <div class="app-wrapper">
 
-    <div id="auth-page">
-        <h2 style="margin-top: 15px; margin-bottom: 5px; color: #00a884;">🟢 Private Message</h2>
-        <p style="color: gray; margin-top: 0; margin-bottom: 15px; font-size: 13px;">নিরাপদ চ্যাট, গ্রুপ এবং স্টোরি সিস্টেম</p>
+    <!-- লোগোসহ স্প্ল্যাশ স্ক্রিন -->
+    <div id="splash-screen">
+        <img src="https://i.ibb.co/FqnNRtgQ/1000106655.png" class="splash-logo" alt="Logo">
+        <div class="splash-title">Private Message</div>
+        <div class="splash-loader"></div>
+    </div>
 
+    <!-- লগইন ও সাইনআপ পেজ (কালারফুল ডিজাইন) -->
+    <div id="auth-page" style="display: none;">
+        <div style="margin-top: 10px;">
+            <img src="https://i.ibb.co/FqnNRtgQ/1000106655.png" class="brand-logo-container" alt="Brand Logo">
+        </div>
+        <h2 style="margin: 5px 0 2px 0; color: #0f766e; font-size: 22px;">Private Message</h2>
+        <p style="color: #475569; margin-top: 0; margin-bottom: 15px; font-size: 13px; font-weight: 500;">নিরাপদ চ্যাট, গ্রুপ এবং স্টোরি সিস্টেম</p>
+
+        <!-- লগইন বক্স -->
         <div class="auth-card" id="login-box">
-            <h3 style="margin-bottom: 10px; margin-top: 0;">লগইন করুন</h3>
+            <h3 style="margin-bottom: 15px; margin-top: 0; color: #1e293b; font-size: 18px;">লগইন করুন</h3>
             <div class="form-group">
                 <label>ইমেইল:</label>
                 <input type="email" id="login-email" placeholder="আপনার ইমেইল দিন">
@@ -220,12 +281,13 @@
             </button>
 
             <div class="toggle-text">
-                <span>অ্যাকাউন্ট নেই?</span> <span onclick="toggleAuthForms('register')">নতুন রেজিস্ট্রেশন করুন</span>
+                <span>অ্যাকাউন্ট নেই? </span> <span onclick="toggleAuthForms('register')">নতুন রেজিস্ট্রেশন করুন</span>
             </div>
         </div>
 
+        <!-- রেজিস্ট্রেশন বক্স -->
         <div class="auth-card" id="register-box" style="display: none;">
-            <h3 style="margin-bottom: 10px; margin-top: 0;">নতুন অ্যাকাউন্ট</h3>
+            <h3 style="margin-bottom: 15px; margin-top: 0; color: #1e293b; font-size: 18px;">নতুন অ্যাকাউন্ট</h3>
             <div class="form-group">
                 <label>আপনার নাম:</label>
                 <input type="text" id="reg-name" placeholder="পুরো নাম">
@@ -241,11 +303,12 @@
             <button class="btn-primary" id="email-reg-btn">রেজিস্ট্রেশন করুন</button>
 
             <div class="toggle-text">
-                <span>আগে থেকেই অ্যাকাউন্ট আছে?</span> <span onclick="toggleAuthForms('login')">লগইন করুন</span>
+                <span>আগে থেকেই অ্যাকাউন্ট আছে? </span> <span onclick="toggleAuthForms('login')">লগইন করুন</span>
             </div>
         </div>
     </div>
 
+    <!-- মেইন অ্যাপ ইন্টারফেস -->
     <div id="main-app" style="display:none; flex-direction:column; height:100%; position:relative;">
         <div class="header">
             <h2 id="page-title" style="margin:0; font-size:20px;">Chats</h2>
@@ -277,6 +340,7 @@
         </div>
     </div>
 
+    <!-- অন্যান্য সকল মডাল উইন্ডো -->
     <div class="modal-overlay" id="story-upload-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
         <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:20px; box-sizing:border-box; text-align:center;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -487,6 +551,17 @@
     let activeLongPressGroupId = null;
     let pendingStoryFile = null;
     let viewingStoryOwnerUid = null;
+
+    // স্প্ল্যাশ স্ক্রিন হাইড করার ফাংশন
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 500);
+            }
+        }, 1200);
+    });
 
     function toggleAuthForms(type) {
         document.getElementById('login-box').style.display = type === 'register' ? 'none' : 'block';
