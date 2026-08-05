@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Private Message (চূড়ান্ত সংস্করণ)</title>
+    <title>Private Message (চূড়ান্ত সংস্করণ - স্টোরি ভিউয়ার ও ভিউ লিস্টসহ)</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -35,14 +35,14 @@
         }
 
         #auth-page {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 25px; text-align: center; overflow-y: auto; background: #fff;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 100vh; padding: 20px 25px 40px 25px; text-align: center; overflow-y: auto; background: #fff; box-sizing: border-box;
         }
         .auth-card {
-            width: 100%; background: #fff; padding: 20px; border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-top: 15px;
+            width: 100%; background: #fff; padding: 15px 20px; border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-top: 10px; margin-bottom: 20px;
         }
-        .form-group { text-align: left; margin-bottom: 12px; }
+        .form-group { text-align: left; margin-bottom: 10px; }
         .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
         .form-group input, .form-group select {
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
@@ -52,7 +52,7 @@
             width: 100%; padding: 11px; background: var(--primary-color); color: #fff;
             border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px;
         }
-        .divider { display: flex; align-items: center; margin: 15px 0; color: gray; font-size: 13px; }
+        .divider { display: flex; align-items: center; margin: 12px 0; color: gray; font-size: 13px; }
         .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid #ddd; }
         .divider::before { margin-right: 10px; }
         .divider::after { margin-left: 10px; }
@@ -63,7 +63,7 @@
             border-radius: 25px; font-weight: bold; cursor: pointer;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1); width: 100%;
         }
-        .toggle-text { font-size: 13px; margin-top: 12px; }
+        .toggle-text { font-size: 13px; margin-top: 12px; margin-bottom: 10px; }
         .toggle-text span { color: var(--primary-color); cursor: pointer; font-weight: bold; }
 
         .header { padding: 12px 15px; background: var(--header-bg); color: white; display: flex; align-items: center; justify-content: space-between; }
@@ -105,7 +105,6 @@
             flex-direction: column; gap: 8px; padding-bottom: 85px; 
             background-image: radial-gradient(#d1d7db 0.75px, transparent 0.75px);
             background-size: 24px 24px;
-            -webkit-user-select: none; user-select: none;
         }
 
         .msg-row { display: flex; flex-direction: column; margin-bottom: 2px; position: relative; }
@@ -117,7 +116,7 @@
         .sent .msg { background: var(--chat-bubble-sent); color: #111b21; border-top-right-radius: 0; }
         .recv .msg { background: var(--chat-bubble-recv); color: #111b21; border-top-left-radius: 0; }
         
-        .msg img { max-width: 100%; border-radius: 6px; margin-top: 4px; display: block; pointer-events: none; }
+        .msg img { max-width: 100%; border-radius: 6px; margin-top: 4px; display: block; }
         .msg video { max-width: 100%; max-height: 220px; border-radius: 6px; margin-top: 4px; display: block; }
         .msg audio { max-width: 200px; height: 35px; margin-top: 4px; }
 
@@ -174,9 +173,9 @@
 
         #image-viewer-modal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; padding: 20px; box-sizing: border-box;
+            background: rgba(0,0,0,0.92); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; padding: 20px; box-sizing: border-box;
         }
-        #image-viewer-modal img { max-width: 95%; max-height: 70%; border-radius: 8px; object-fit: contain; pointer-events: none; }
+        #image-viewer-modal img { max-width: 95%; max-height: 55%; border-radius: 8px; object-fit: contain; }
         #image-viewer-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 28px; cursor: pointer; font-weight: bold; background: none; border: none; z-index: 1001; }
 
         .panel-box { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
@@ -187,7 +186,7 @@
 
         .story-container { display: flex; gap: 12px; overflow-x: auto; padding: 10px; background: #fff; margin-bottom: 10px; border-radius: 8px; align-items: center; }
         .story-circle { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex-shrink: 0; }
-        .story-ring { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary-color); padding: 2px; display: flex; align-items: center; justify-content: center; background: #fff; }
+        .story-ring { width: 62px; height: 62px; border-radius: 50%; border: 3px solid var(--primary-color); padding: 2px; display: flex; align-items: center; justify-content: center; background: #fff; }
         .story-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .story-circle span { font-size: 11px; max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
         .add-story-ring { border: 3px dashed #ccc; color: #00a884; font-size: 24px; font-weight: bold; background: #f9f9f9; }
@@ -198,11 +197,11 @@
 <div class="app-wrapper">
 
     <div id="auth-page">
-        <h2 style="margin-top: 10px; color: #00a884;">🟢 Private Message</h2>
-        <p style="color: gray; margin-top: 5px; font-size: 13px;">নিরাপদ চ্যাট, গ্রুপ এবং স্টোরি সিস্টেম</p>
+        <h2 style="margin-top: 15px; margin-bottom: 5px; color: #00a884;">🟢 Private Message</h2>
+        <p style="color: gray; margin-top: 0; margin-bottom: 15px; font-size: 13px;">নিরাপদ চ্যাট, গ্রুপ এবং স্টোরি সিস্টেম</p>
 
         <div class="auth-card" id="login-box">
-            <h3 style="margin-bottom: 10px;">লগইন করুন</h3>
+            <h3 style="margin-bottom: 10px; margin-top: 0;">লগইন করুন</h3>
             <div class="form-group">
                 <label>ইমেইল:</label>
                 <input type="email" id="login-email" placeholder="আপনার ইমেইল দিন">
@@ -226,7 +225,7 @@
         </div>
 
         <div class="auth-card" id="register-box" style="display: none;">
-            <h3 style="margin-bottom: 10px;">নতুন অ্যাকাউন্ট</h3>
+            <h3 style="margin-bottom: 10px; margin-top: 0;">নতুন অ্যাকাউন্ট</h3>
             <div class="form-group">
                 <label>আপনার নাম:</label>
                 <input type="text" id="reg-name" placeholder="পুরো নাম">
@@ -291,7 +290,10 @@
                 <label>স্টোরি টাইটেল / ক্যাপশন:</label>
                 <input type="text" id="story-caption-input" placeholder="আপনার মনের কথা বা টাইটেল লিখুন...">
             </div>
-            <button class="btn-primary" onclick="confirmUploadStory()">স্টোরি দিন</button>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-primary" style="background:#54656f;" onclick="shareStoryAsMessage()">💬 মেসেজে পাঠান</button>
+                <button class="btn-primary" onclick="confirmUploadStory()">⭕ স্টোরিতে দিন</button>
+            </div>
         </div>
     </div>
 
@@ -387,10 +389,28 @@
         </div>
     </div>
 
-    <div id="image-viewer-modal" onclick="closeImageViewer()">
-        <button id="image-viewer-close">✕</button>
+    <div id="image-viewer-modal">
+        <button id="image-viewer-close" onclick="closeImageViewer()">✕</button>
         <img id="fullscreen-img-src" src="">
-        <p id="fullscreen-img-caption" style="color: white; margin-top: 15px; font-size: 16px; font-weight: bold; text-align:center;"></p>
+        <p id="fullscreen-img-caption" style="color: white; margin: 10px 0; font-size: 15px; font-weight: bold; text-align:center;"></p>
+        
+        <div id="story-view-stats" style="display:none; color:#fff; font-size:13px; background:rgba(0,0,0,0.6); padding:4px 12px; border-radius:12px; margin-bottom:8px; text-align:center;">
+            👁️ <span id="story-view-count">0</span> জন দেখেছে
+        </div>
+
+        <div id="story-action-box" style="display:none; width:90%; max-width:380px; flex-direction:column; gap:8px; margin-top:5px;">
+            <div style="display:flex; justify-content:center; gap:12px;">
+                <button onclick="sendStoryReaction('❤️')" style="background:none; border:none; font-size:26px; cursor:pointer;">❤️</button>
+                <button onclick="sendStoryReaction('🔥')" style="background:none; border:none; font-size:26px; cursor:pointer;">🔥</button>
+                <button onclick="sendStoryReaction('😍')" style="background:none; border:none; font-size:26px; cursor:pointer;">😍</button>
+                <button onclick="sendStoryReaction('👏')" style="background:none; border:none; font-size:26px; cursor:pointer;">👏</button>
+                <button onclick="sendStoryReaction('😂')" style="background:none; border:none; font-size:26px; cursor:pointer;">😂</button>
+            </div>
+            <div style="display:flex; gap:6px; width:100%;">
+                <input type="text" id="story-comment-input" placeholder="রিপ্লাই বা কমেন্ট লিখুন..." style="flex:1; padding:8px 12px; border-radius:20px; border:none; outline:none; font-size:14px;">
+                <button onclick="submitStoryComment()" style="background:var(--primary-color); color:#fff; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer;">পাঠান</button>
+            </div>
+        </div>
     </div>
 
     <div id="msg-context-menu" class="msg-context-menu">
@@ -466,6 +486,7 @@
     let activeLongPressMsgKey = null;
     let activeLongPressGroupId = null;
     let pendingStoryFile = null;
+    let viewingStoryOwnerUid = null;
 
     function toggleAuthForms(type) {
         document.getElementById('login-box').style.display = type === 'register' ? 'none' : 'block';
@@ -624,14 +645,11 @@
                 }, 600);
             };
 
-            const cancelPress = () => {
-                clearTimeout(pressTimer);
-            };
+            const cancelPress = () => clearTimeout(pressTimer);
 
             div.addEventListener('touchstart', startPress);
             div.addEventListener('touchend', cancelPress);
             div.addEventListener('touchmove', cancelPress);
-
             div.addEventListener('mousedown', startPress);
             div.addEventListener('mouseup', cancelPress);
             div.addEventListener('mouseleave', cancelPress);
@@ -730,15 +748,80 @@
         });
     }
 
-    window.openFullscreenImage = function(imgSrc, captionText = '') {
+    window.openFullscreenImage = function(imgSrc, captionText = '', storyOwnerUid = null) {
         document.getElementById('fullscreen-img-src').src = imgSrc;
         document.getElementById('fullscreen-img-caption').innerText = captionText;
+        
+        viewingStoryOwnerUid = storyOwnerUid;
+        const actionBox = document.getElementById('story-action-box');
+        const statsBox = document.getElementById('story-view-stats');
+        
+        if (storyOwnerUid) {
+            db.ref('stories/' + storyOwnerUid + '/viewers/' + currentUser.uid).set({
+                name: currentUser.displayName || 'User',
+                time: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            db.ref('stories/' + storyOwnerUid + '/viewers').on('value', snap => {
+                const count = snap.numChildren();
+                document.getElementById('story-view-count').innerText = count;
+            });
+            statsBox.style.display = 'block';
+
+            if (storyOwnerUid !== currentUser.uid) {
+                actionBox.style.display = 'flex';
+            } else {
+                actionBox.style.display = 'none';
+            }
+        } else {
+            statsBox.style.display = 'none';
+            actionBox.style.display = 'none';
+        }
+
         document.getElementById('image-viewer-modal').style.display = 'flex';
     };
 
     window.closeImageViewer = function() {
+        if (viewingStoryOwnerUid) {
+            db.ref('stories/' + viewingStoryOwnerUid + '/viewers').off();
+        }
         document.getElementById('image-viewer-modal').style.display = 'none';
+        viewingStoryOwnerUid = null;
+        document.getElementById('story-action-box').style.display = 'none';
+        document.getElementById('story-view-stats').style.display = 'none';
     };
+
+    function sendStoryReaction(emoji) {
+        if (!viewingStoryOwnerUid) return;
+        const chatRoomID = currentUser.uid < viewingStoryOwnerUid ? `${currentUser.uid}_${viewingStoryOwnerUid}` : `${viewingStoryOwnerUid}_${currentUser.uid}`;
+        
+        db.ref('private_chats/' + chatRoomID).push({
+            sender: currentUser.uid,
+            senderName: currentUser.displayName || 'User',
+            text: `স্টোরিতে রিঅ্যাকশন দিয়েছেন: <span style="font-size:24px;">${emoji}</span>`,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            alert('রিঅ্যাকশন পাঠানো হয়েছে!');
+            closeImageViewer();
+        });
+    }
+
+    function submitStoryComment() {
+        const comment = document.getElementById('story-comment-input').value.trim();
+        if (!comment || !viewingStoryOwnerUid) return;
+        const chatRoomID = currentUser.uid < viewingStoryOwnerUid ? `${currentUser.uid}_${viewingStoryOwnerUid}` : `${viewingStoryOwnerUid}_${currentUser.uid}`;
+
+        db.ref('private_chats/' + chatRoomID).push({
+            sender: currentUser.uid,
+            senderName: currentUser.displayName || 'User',
+            text: `স্টোরি কমেন্ট: ${comment}`,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            document.getElementById('story-comment-input').value = '';
+            alert('কমেন্ট সফলভাবে ইনবক্সে পাঠানো হয়েছে!');
+            closeImageViewer();
+        });
+    }
 
     function previewTargetProfile() {
         if(activeChatTarget) {
@@ -835,14 +918,11 @@
                 }, 600);
             };
 
-            const cancelPress = () => {
-                clearTimeout(pressTimer);
-            };
+            const cancelPress = () => clearTimeout(pressTimer);
 
             bubbleEl.addEventListener('touchstart', startPress);
             bubbleEl.addEventListener('touchend', cancelPress);
             bubbleEl.addEventListener('touchmove', cancelPress);
-
             bubbleEl.addEventListener('mousedown', startPress);
             bubbleEl.addEventListener('mouseup', cancelPress);
             bubbleEl.addEventListener('mouseleave', cancelPress);
@@ -869,9 +949,7 @@
     document.getElementById('delete-msg-btn').onclick = () => {
         if(activeLongPressMsgKey && currentChatRef) {
             currentChatRef.child(activeLongPressMsgKey).remove()
-                .then(() => {
-                    hideGlobalContextMenu();
-                })
+                .then(() => hideGlobalContextMenu())
                 .catch(err => alert("ডিলিট করতে সমস্যা হয়েছে: " + err.message));
         }
     };
@@ -1181,7 +1259,6 @@
                 snapshot.forEach(child => {
                     const st = child.val();
                     
-                    // ২৪ ঘণ্টা পার হলে স্টোরি স্বয়ংক্রিয়ভাবে মুছে ফেলা
                     if (st.expiresAt && now > st.expiresAt) {
                         db.ref('stories/' + st.uid).remove();
                         return;
@@ -1189,25 +1266,38 @@
 
                     const storyDiv = document.createElement('div');
                     storyDiv.className = 'story-circle';
+                    
                     storyDiv.innerHTML = `
                         <div class="story-ring">
-                            <img src="${st.photoURL}">
+                            <img src="${st.storyImg}">
                         </div>
                         <span>${st.uid === currentUser.uid ? 'আমার স্টোরি' : st.name}</span>
                     `;
                     
-                    // নিজের স্টোরি হলে ক্লিক করলে ডিলিট করার অপশন এবং অন্যের স্টোরি হলে দেখার অপশন
                     storyDiv.onclick = () => {
-                        if (st.uid === currentUser.uid) {
-                            if (confirm("আপনি কি আপনার এই স্টোরিটি ডিলিট করতে চান?")) {
-                                db.ref('stories/' + currentUser.uid).remove().then(() => {
-                                    alert('স্টোরি ডিলিট করা হয়েছে!');
-                                });
-                            }
-                        } else {
-                            openFullscreenImage(st.storyImg, `${st.name}: ${st.caption || ''}`);
-                        }
+                        openFullscreenImage(st.storyImg, `${st.name}: ${st.caption || ''}`, st.uid);
                     };
+
+                    let pressTimer;
+                    const startPress = () => {
+                        pressTimer = setTimeout(() => {
+                            if (st.uid === currentUser.uid) {
+                                if (confirm("আপনি কি আপনার এই স্টোরিটি ডিলিট করতে চান?")) {
+                                    db.ref('stories/' + currentUser.uid).remove().then(() => {
+                                        alert('স্টোরি ডিলিট করা হয়েছে!');
+                                    });
+                                }
+                            }
+                        }, 600);
+                    };
+                    const cancelPress = () => clearTimeout(pressTimer);
+
+                    storyDiv.addEventListener('touchstart', startPress);
+                    storyDiv.addEventListener('touchend', cancelPress);
+                    storyDiv.addEventListener('touchmove', cancelPress);
+                    storyDiv.addEventListener('mousedown', startPress);
+                    storyDiv.addEventListener('mouseup', cancelPress);
+                    storyDiv.addEventListener('mouseleave', cancelPress);
 
                     storyContainer.appendChild(storyDiv);
                 });
@@ -1288,11 +1378,31 @@
         pendingStoryFile = null;
     }
 
+    function shareStoryAsMessage() {
+        if(!pendingStoryFile || !activeChatTarget) {
+            alert('দয়া করে প্রথমে চ্যাট উইন্ডো ওপেন করে তারপর চ্যাটে ছবি পাঠাতে পারেন অথবা সরাসরি স্টোরিতে দিন!');
+            closeStoryUploadModal();
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            currentChatRef.push({
+                sender: currentUser.uid,
+                senderName: currentUser.displayName || 'User',
+                image: evt.target.result,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            closeStoryUploadModal();
+            alert('ছবিটি সফলভাবে চ্যাটে পাঠানো হয়েছে!');
+        };
+        reader.readAsDataURL(pendingStoryFile);
+    }
+
     function confirmUploadStory() {
         if(!pendingStoryFile) return;
         const caption = document.getElementById('story-caption-input').value.trim();
         const currentTime = Date.now();
-        const expireTime = currentTime + (24 * 60 * 60 * 1000); // ২৪ ঘণ্টা মেয়াদ
+        const expireTime = currentTime + (24 * 60 * 60 * 1000);
         
         uploadImageToImgBB(pendingStoryFile, (imgData) => {
             db.ref('stories/' + currentUser.uid).set({
