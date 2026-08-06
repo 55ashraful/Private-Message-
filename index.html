@@ -2019,7 +2019,7 @@
 
         currentUser.updateProfile({ displayName: name, photoURL: photoURL }).then(() => {
             db.ref('users/' + currentUser.uid).update({ name: name, photoURL: photoURL, statusText: statusText }).then(() => {
-                alert('প্রোফাইল সফলভাবে আপডেট করা হয়েছে!');
+                alert('Profile Successful ✅');
             });
         });
     };
