@@ -262,7 +262,20 @@
         .story-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; pointer-events: none; }
         .story-circle span { font-size: 11px; max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
         .add-story-ring { border: 3px dashed #ccc; color: #00a884; font-size: 24px; font-weight: bold; background: #f9f9f9; }
-    </style>
+         /* Love Stories Design */
+.story-card-item {
+    background: var(--card-bg); border-radius: 8px; padding: 15px;
+    margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s;
+}
+.story-card-item:active { transform: scale(0.98); background: #f8f9fa; }
+.story-card-item h3 { margin: 0 0 6px 0; font-size: 16px; font-weight: 600; color: var(--text-color); }
+.story-card-item p { margin: 0 0 12px 0; font-size: 14px; color: var(--secondary-text); line-height: 1.4; }
+.story-read-btn {
+    background: var(--primary-gradient); color: white; border: none;
+    padding: 8px 15px; border-radius: 6px; font-weight: 600; font-size: 13px;
+    cursor: pointer; width: 100%;
+}
+</style>
 </head>
 <body oncontextmenu="return false;"> <!-- পুরো পেজে রাইট-ক্লিক বন্ধ রাখা হলো -->
 
@@ -354,15 +367,37 @@
             <button class="nav-item" id="tab-btn-updates" onclick="switchTab('updates')">
                 <span class="nav-icon">⭕</span><span id="t-nav-updates">Updates</span>
             </button>
-            <button class="nav-item" id="tab-btn-communities" onclick="switchTab('communities')">
-                <span class="nav-icon">👥</span><span id="t-nav-communities">Communities</span>
-            </button>
+           <button class="nav-item" id="tab-btn-communities" onclick="openLoveStories()">
+           <span class="nav-icon">❤️</span><span id="t-nav-communities">Love Stories</span>
+           </button>
             <button class="nav-item" id="tab-btn-settings" onclick="switchTab('settings')">
                 <span class="nav-icon">⚙️</span><span id="t-nav-settings">Settings</span>
             </button>
         </div>
     </div>
-
+         <!-- Love Stories Screen -->
+    <div id="love-stories-screen" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: none; flex-direction: column; z-index: 10; overflow: hidden;">
+        <div class="header">
+            <button class="back-btn" onclick="closeLoveStories()">⬅️</button>
+            <h2 style="margin:0; font-size:20px;">❤️ Love Stories</h2>
+        </div>
+        
+        <div class="content-area" id="loveStoriesContainer" style="padding: 15px; padding-bottom: 90px;">
+            <p style="text-align:center; color:var(--secondary-text);">গল্প লোড হচ্ছে...</p>
+        </div>
+        
+        <!-- ফুল স্ক্রিন গল্প ভিউয়ার -->
+        <div id="story-viewer-screen" style="position: absolute; top:0; left:0; width:100%; height:100%; background: var(--bg-color); display: none; flex-direction: column; z-index: 20;">
+            <div class="header">
+                <button class="back-btn" onclick="closeStoryViewer()">⬅️</button>
+                <h2 id="story-viewer-title" style="margin:0; font-size:17px; margin-left:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">গল্পের শিরোনাম</h2>
+            </div>
+            <div class="content-area" style="padding: 20px; padding-bottom: 90px;">
+                <div id="story-viewer-body" style="background: var(--card-bg); padding: 25px; border-radius: 12px; font-size: 16px; line-height: 1.8; color: var(--text-color); white-space: pre-line; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"></div>
+            </div>
+        </div>
+    </div>
+    
     <!-- মডাল উইন্ডোজ -->
     <div class="modal-overlay" id="story-upload-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:500;">
         <div style="width:90%; max-width:340px; background:#fff; border-radius:12px; padding:20px; box-sizing:border-box; text-align:center;">
@@ -455,44 +490,6 @@
             </div>
             <div class="sticker-grid">
                 <div class="sticker-item" onclick="sendSticker('😀')">😀</div>
-                <div class="sticker-item" onclick="sendSticker('😂')">😂</div>
-                <div class="sticker-item" onclick="sendSticker('😱')">😱</div>
-                <div class="sticker-item" onclick="sendSticker('💝')">💝</div>
-                <div class="sticker-item" onclick="sendSticker('💘')">💘</div>
-                <div class="sticker-item" onclick="sendSticker('💞')">💞</div>
-                <div class="sticker-item" onclick="sendSticker('💋')">💋</div>
-                <div class="sticker-item" onclick="sendSticker('🙋🏻‍♂️')">🙋🏻‍♂️</div>
-                <div class="sticker-item" onclick="sendSticker('🍂')">🍂</div>
-                <div class="sticker-item" onclick="sendSticker('🌿')">🌿</div>
-                <div class="sticker-item" onclick="sendSticker('🧧')">🧧</div>
-                <div class="sticker-item" onclick="sendSticker('💯')">💯</div>
-                <div class="sticker-item" onclick="sendSticker('💸')">💸</div>
-                <div class="sticker-item" onclick="sendSticker('📢')">📢</div>
-                <div class="sticker-item" onclick="sendSticker('🚫')">🚫</div>
-                <div class="sticker-item" onclick="sendSticker('✅')">✅</div>
-                <div class="sticker-item" onclick="sendSticker('❎')">❎</div>
-                <div class="sticker-item" onclick="sendSticker('💲')">💲</div>
-                <div class="sticker-item" onclick="sendSticker('✔️')">✔️</div>
-                <div class="sticker-item" onclick="sendSticker('🇧🇩')">🇧🇩</div>
-                <div class="sticker-item" onclick="sendSticker('⚠️')">⚠️</div>
-                <div class="sticker-item" onclick="sendSticker('📳')">📳</div>
-                <div class="sticker-item" onclick="sendSticker('🔕')">🔕</div>
-                <div class="sticker-item" onclick="sendSticker('😍')">😍</div>
-                <div class="sticker-item" onclick="sendSticker('🔥')">🔥</div>
-                <div class="sticker-item" onclick="sendSticker('👍')">👍</div>
-                <div class="sticker-item" onclick="sendSticker('🎉')">🎉</div>
-                <div class="sticker-item" onclick="sendSticker('❤️')">❤️</div>
-                <div class="sticker-item" onclick="sendSticker('😎')">😎</div>
-                <div class="sticker-item" onclick="sendSticker('😢')">😢</div>
-                <div class="sticker-item" onclick="sendSticker('🙏')">🙏</div>
-                <div class="sticker-item" onclick="sendSticker('🚀')">🚀</div>
-                <div class="sticker-item" onclick="sendSticker('⭐')">⭐</div>
-                <div class="sticker-item" onclick="sendSticker('👏')">👏</div>
-                <div class="sticker-item" onclick="sendSticker('👑')">👑</div>
-                <div class="sticker-item" onclick="sendSticker('🌹')">🌹</div>
-                <div class="sticker-item" onclick="sendSticker('💡')">💡</div>
-                <div class="sticker-item" onclick="sendSticker('⚡')">⚡</div>
-                <div class="sticker-item" onclick="sendSticker('🎁')">🎁</div>
                 <div class="sticker-item" onclick="sendSticker('🐱')">🐱</div>
                 <div class="sticker-item" onclick="sendSticker('🐶')">🐶</div>
             </div>
@@ -512,9 +509,6 @@
             <div style="display:flex; justify-content:center; gap:12px;">
                 <button onclick="sendStoryReaction('❤️')" style="background:none; border:none; font-size:26px; cursor:pointer;">❤️</button>
                 <button onclick="sendStoryReaction('🔥')" style="background:none; border:none; font-size:26px; cursor:pointer;">🔥</button>
-                <button onclick="sendStoryReaction('😍')" style="background:none; border:none; font-size:26px; cursor:pointer;">😍</button>
-                <button onclick="sendStoryReaction('👏')" style="background:none; border:none; font-size:26px; cursor:pointer;">👏</button>
-                <button onclick="sendStoryReaction('😂')" style="background:none; border:none; font-size:26px; cursor:pointer;">😂</button>
             </div>
             <div style="display:flex; gap:6px; width:100%;">
                 <input type="text" id="story-comment-input" placeholder="রিপ্লাই বা কমেন্ট লিখুন..." style="flex:1; padding:8px 12px; border-radius:20px; border:none; outline:none; font-size:14px;">
@@ -2023,6 +2017,67 @@
             });
         });
     };
+        // ===== Love Stories System =====
+    let loveStoriesListener = null;
+
+    function openLoveStories() {
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('love-stories-screen').style.display = 'flex';
+        loadLoveStories();
+    }
+
+    function closeLoveStories() {
+        document.getElementById('love-stories-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        if (loveStoriesListener) {
+            loveStoriesListener.off();
+            loveStoriesListener = null;
+        }
+    }
+
+    function loadLoveStories() {
+        const container = document.getElementById('loveStoriesContainer');
+        container.innerHTML = '<p style="text-align:center; color:var(--secondary-text);">গল্প লোড হচ্ছে...</p>';
+        
+        loveStoriesListener = db.ref('love_stories');
+        loveStoriesListener.on('value', (snapshot) => {
+            const data = snapshot.val();
+            container.innerHTML = '';
+            
+            if (!data) {
+                container.innerHTML = '<p style="text-align:center; color:var(--secondary-text); margin-top:20px;">এখনও কোনো গল্প যুক্ত করা হয়নি।</p>';
+                return;
+            }
+            
+            const stories = Object.values(data);
+            
+            stories.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'story-card-item';
+                card.innerHTML = `
+                    <h3>${story.title || 'তথ্যহীন গল্প'}</h3>
+                    <p>${story.preview || ''}</p>
+                    <button class="story-read-btn" onclick="openStoryViewer('${story.id}')">পড়ুন</button>
+                `;
+                container.appendChild(card);
+            });
+        });
+    }
+
+    function openStoryViewer(storyId) {
+        db.ref('love_stories/' + storyId).once('value').then((snapshot) => {
+            const story = snapshot.val();
+            if (story) {
+                document.getElementById('story-viewer-title').innerText = story.title;
+                document.getElementById('story-viewer-body').innerText = story.fullStory;
+                document.getElementById('story-viewer-screen').style.display = 'flex';
+            }
+        });
+    }
+
+    function closeStoryViewer() {
+        document.getElementById('story-viewer-screen').style.display = 'none';
+    }
 </script>
 </body>
 </html>
